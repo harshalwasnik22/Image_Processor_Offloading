@@ -64,7 +64,6 @@ const ImageProcessor = () => {
     reader.readAsDataURL(file);
   };
 
-
   const processImage = async () => {
     try {
       const response = await fetch(
@@ -84,7 +83,7 @@ const ImageProcessor = () => {
             rotation,
             exposure,
             brightness,
-            contrast, 
+            contrast,
             saturation,
           }),
         }
@@ -92,8 +91,8 @@ const ImageProcessor = () => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log(data)
-        setProcessedImage(`data:image/jpeg;base64,${data}`);
+        console.log(data.processedImage);
+        setProcessedImage(`data:image/jpeg;base64,${data.processedImage}`);
       } else {
         console.error("Error processing image:", response.statusText);
       }
@@ -101,6 +100,7 @@ const ImageProcessor = () => {
       console.error("Error processing image:", error);
     }
   };
+
   const downloadImage = () => {
     const link = document.createElement("a");
     link.href = processedImage;
