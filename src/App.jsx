@@ -91,7 +91,7 @@ const ImageProcessor = () => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log(data.processedImage);
+        // console.log(data.processedImage);
         setProcessedImage(`data:image/jpeg;base64,${data.processedImage}`);
       } else {
         console.error("Error processing image:", response.statusText);
