@@ -67,7 +67,7 @@ const ImageProcessor = () => {
   const processImage = async () => {
     try {
       const response = await fetch(
-        "https://gui5sv2mn4.execute-api.ap-south-1.amazonaws.com/dev/process-image",
+        "https://gui5sv2mn4.execute-api.ap-south-1.amazonaws.com/devv/process-image",
         {
           method: "POST",
           // mode: "no-cors",
@@ -91,7 +91,7 @@ const ImageProcessor = () => {
 
       if (response.ok) {
         const data = await response.json();
-        // console.log(data.processedImage);
+        console.log(data.processedImage);
         setProcessedImage(`data:image/jpeg;base64,${data.processedImage}`);
       } else {
         console.error("Error processing image:", response.statusText);
