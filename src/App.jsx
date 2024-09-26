@@ -64,58 +64,14 @@ const ImageProcessor = () => {
     reader.readAsDataURL(file);
   };
 
-  // const processImage = () => {
-  //   /////////
-  //   setProcessedImage(image);
-  //   console.log('Processing with:', {
-  //     width, height, effectType, effectStrength, rotation, exposure, brightness, contrast, saturation
-  //   });
-  // };
 
-  // const processImage = async () => {
-  //   try {
-
-  //     const response = await fetch(
-  //       "https://gui5sv2mn4.execute-api.ap-south-1.amazonaws.com/dev/process-image",
-  //       {
-  //         method: "POST",
-  //         mode: "no-cors",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify({
-  //           image: image.split(",")[1], // remove the data:image/jpeg;base64 prefix
-  //           width,
-  //           height,
-  //           effectType,
-  //           effectStrength,
-  //           rotation,
-  //           exposure,
-  //           brightness,
-  //           contrast,
-  //           saturation,
-  //         }),
-  //       }
-  //     );
-
-  //     const data = await response.text()
-  //     console.log(response)
-  //     if (response.ok) {
-  //       setProcessedImage(`data:image/jpeg;base64,${data.processedImage}`);
-  //     } else {
-  //       console.error("Error processing image:", response.statusText);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error processing images  :", error);
-  //   }
-  // };
   const processImage = async () => {
     try {
       const response = await fetch(
         "https://gui5sv2mn4.execute-api.ap-south-1.amazonaws.com/dev/process-image",
         {
           method: "POST",
-          mode: "no-cors",
+          // mode: "no-cors",
           headers: {
             "Content-Type": "application/json",
           },
