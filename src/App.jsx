@@ -9,7 +9,9 @@ import {
   Download,
   FlipHorizontal,
   FlipVertical,
-  RotateCw,
+  Palette,
+  Filter,
+  Sparkles,
 } from "lucide-react";
 import {
   Select,
@@ -18,20 +20,42 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const ImageProcessor = () => {
   const [image, setImage] = useState(null);
   const [processedImage, setProcessedImage] = useState(null);
-  const [capturing, setCapturing] = useState(false); // Track camera capturing
+  const [capturing, setCapturing] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  // Basic adjustments
   const [width, setWidth] = useState(100);
   const [height, setHeight] = useState(100);
-  const [effectType, setEffectType] = useState("none");
-  const [effectStrength, setEffectStrength] = useState(0);
-  const [rotation, setRotation] = useState(0);
-  const [exposure, setExposure] = useState(0);
   const [brightness, setBrightness] = useState(100);
   const [contrast, setContrast] = useState(100);
   const [saturation, setSaturation] = useState(100);
+
+  // Effects
+  const [effectType, setEffectType] = useState("none");
+  const [effectStrength, setEffectStrength] = useState(0);
+  const [sharpen, setSharpen] = useState(0);
+  const [noise, setNoise] = useState(0);
+  const [vignette, setVignette] = useState(0);
+  const [sepia, setSepia] = useState(0);
+  const [grayscale, setGrayscale] = useState(false);
+
+  const [invert, setInvert] = useState(false);
+  // Additional state variables for tint and color enhancement
+  const [tintColor, setTintColor] = useState(""); // Default tint color (red)
+  const [colorEnhance, setColorEnhance] = useState(100); // Default color enhancement level
+
+  // Transform
+  const [rotation, setRotation] = useState(0);
+  const [horizontalFlip, setHorizontalFlip] = useState(null);
+  const [verticalFlip, setVerticalFlip] = useState(null);
+
+  // Filter
+
   const fileInputRef = useRef(null);
   const videoRef = useRef(null);
 
@@ -81,10 +105,19 @@ const ImageProcessor = () => {
             effectType,
             effectStrength,
             rotation,
-            exposure,
             brightness,
             contrast,
             saturation,
+            sharpen,
+            noise,
+            vignette,
+            sepia,
+            applyGray: grayscale, // explicitly match the variable
+            invertColors: invert,
+            horizontalFlip,
+            verticalFlip,
+            tintColor, // Include tint color in the request
+            colorEnhance,
           }),
         }
       );
@@ -98,6 +131,8 @@ const ImageProcessor = () => {
       }
     } catch (error) {
       console.error("Error processing image:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -117,8 +152,8 @@ const ImageProcessor = () => {
           <CardTitle>Advanced Image Processor</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
+          <div className="flex-col md:grid md:grid-cols-2 gap-4">
+            <div className="pb-4">
               <h3 className="text-lg font-semibold mb-2">Original Image</h3>
               {capturing ? (
                 <video ref={videoRef} className="w-full h-auto" />
@@ -177,139 +212,239 @@ const ImageProcessor = () => {
             </div>
           </div>
           <div className="mt-8 space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Width (%) - {width}
-              </label>
-              <Slider
-                value={[width]}
-                onValueChange={(value) => setWidth(value[0])}
-                min={10}
-                max={200}
-                step={1}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Height (%) - {height}
-              </label>
-              <Slider
-                value={[height]}
-                onValueChange={(value) => setHeight(value[0])}
-                min={10}
-                max={200}
-                step={1}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Effect Type
-              </label>
-              <Select value={effectType} onValueChange={setEffectType}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select effect type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
-                  <SelectItem value="gaussian">Gaussian Blur</SelectItem>
-                  <SelectItem value="box">Box Blur</SelectItem>
-                  <SelectItem value="motion">Motion Blur</SelectItem>
-                  <SelectItem value="radial">Radial Blur</SelectItem>
-                  <SelectItem value="zoom">Zoom Blur</SelectItem>
-                  <SelectItem value="lens">Lens Blur</SelectItem>
-                  <SelectItem value="mosaic">Mosaic</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Effect Strength - {effectStrength}
-              </label>
-              <Slider
-                value={[effectStrength]}
-                onValueChange={(value) => setEffectStrength(value[0])}
-                min={0}
-                max={100}
-                step={1}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Rotation (degrees) - {rotation}
-              </label>
-              <Slider
-                value={[rotation]}
-                onValueChange={(value) => setRotation(value[0])}
-                min={0}
-                max={360}
-                step={1}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Exposure - {exposure}
-              </label>
-              <Slider
-                value={[exposure]}
-                onValueChange={(value) => setExposure(value[0])}
-                min={-100}
-                max={100}
-                step={1}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Brightness - {brightness}
-              </label>
-              <Slider
-                value={[brightness]}
-                onValueChange={(value) => setBrightness(value[0])}
-                min={0}
-                max={200}
-                step={1}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Contrast - {contrast}
-              </label>
-              <Slider
-                value={[contrast]}
-                onValueChange={(value) => setContrast(value[0])}
-                min={0}
-                max={200}
-                step={1}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Saturation - {saturation}
-              </label>
-              <Slider
-                value={[saturation]}
-                onValueChange={(value) => setSaturation(value[0])}
-                min={0}
-                max={200}
-                step={1}
-              />
-            </div>
-            <div className="flex space-x-2">
-              <Button variant="outline" className="flex-1">
-                <FlipHorizontal className="mr-2 h-4 w-4" /> Flip Horizontal
-              </Button>
-              <Button variant="outline" className="flex-1">
-                <FlipVertical className="mr-2 h-4 w-4" /> Flip Vertical
-              </Button>
-              <Button variant="outline" className="flex-1">
-                <RotateCw className="mr-2 h-4 w-4" /> Rotate
-              </Button>
-            </div>
+            <Tabs defaultValue="basic" className="mt-8">
+              <TabsList className="grid grid-cols-3 w-full">
+                <TabsTrigger value="basic">Basic</TabsTrigger>
+                <TabsTrigger value="transform">Transform</TabsTrigger>
+                <TabsTrigger value="effects">Effects</TabsTrigger>
+              </TabsList>
+              <TabsContent value="basic" className="space-y-4">
+                {/* Existing sliders for width, height, brightness, contrast, etc. */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Brightness - {brightness}
+                  </label>
+                  <Slider
+                    value={[brightness]}
+                    onValueChange={(value) => setBrightness(value[0])}
+                    min={0}
+                    max={200}
+                    step={1}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Contrast - {contrast}
+                  </label>
+                  <Slider
+                    value={[contrast]}
+                    onValueChange={(value) => setContrast(value[0])}
+                    min={0}
+                    max={200}
+                    step={1}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Saturation - {saturation}
+                  </label>
+                  <Slider
+                    value={[saturation]}
+                    onValueChange={(value) => setSaturation(value[0])}
+                    min={0}
+                    max={200}
+                    step={1}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Sharpen - {sharpen}
+                  </label>
+                  <Slider
+                    value={[sharpen]}
+                    onValueChange={(value) => setSharpen(value[0])}
+                    min={0}
+                    max={100}
+                    step={1}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Noise - {noise}
+                  </label>
+                  <Slider
+                    value={[noise]}
+                    onValueChange={(value) => setNoise(value[0])}
+                    min={0}
+                    max={100}
+                    step={1}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Vignette - {vignette}
+                  </label>
+                  <Slider
+                    value={[vignette]}
+                    onValueChange={(value) => setVignette(value[0])}
+                    min={0}
+                    max={100}
+                    step={1}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Sepia - {sepia}
+                  </label>
+                  <Slider
+                    value={[sepia]}
+                    onValueChange={(value) => setSepia(value[0])}
+                    min={0}
+                    max={100}
+                    step={1}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Color Enhancement - {colorEnhance}
+                  </label>
+                  <Slider
+                    value={[colorEnhance]}
+                    onValueChange={(value) => setColorEnhance(value[0])}
+                    min={0}
+                    max={200}
+                    step={1}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Tint Color
+                  </label>
+                  <input
+                    type="color"
+                    value={tintColor}
+                    onChange={(e) => setTintColor(e.target.value)}
+                    className="w-full h-10 border rounded"
+                    disabled={grayscale} // Disable tint color input if grayscale is active
+                  />
+                </div>
+                <div className="flex space-x-4">
+                  <Button
+                    variant={grayscale ? "default" : "outline"}
+                    onClick={() => {
+                      setGrayscale(!grayscale);
+                      if (!grayscale) {
+                        setTintColor(""); // Reset tint color when enabling grayscale
+                      }
+                    }}
+                  >
+                    <Palette className="mr-2 h-4 w-4" />
+                    Grayscale
+                  </Button>
+                  <Button
+                    variant={invert ? "default" : "outline"}
+                    onClick={() => setInvert(!invert)}
+                  >
+                    <Filter className="mr-2 h-4 w-4" />
+                    Invert
+                  </Button>
+                </div>
+              </TabsContent>
+              <TabsContent value="transform" className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Width (%) - {width}
+                  </label>
+                  <Slider
+                    value={[width]}
+                    onValueChange={(value) => setWidth(value[0])}
+                    min={10}
+                    max={200}
+                    step={1}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Height (%) - {height}
+                  </label>
+                  <Slider
+                    value={[height]}
+                    onValueChange={(value) => setHeight(value[0])}
+                    min={10}
+                    max={200}
+                    step={1}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Rotation (degrees) - {rotation}
+                  </label>
+                  <Slider
+                    value={[rotation]}
+                    onValueChange={(value) => setRotation(value[0])}
+                    min={0}
+                    max={360}
+                    step={1}
+                  />
+                </div>
+                <div className="flex space-x-4">
+                  <Button
+                    variant={horizontalFlip ? "default" : "outline"}
+                    onClick={() => setHorizontalFlip(!horizontalFlip)}
+                  >
+                    <FlipHorizontal className="mr-2 h-4 w-4" />
+                    Flip Horizontal
+                  </Button>
+                  <Button
+                    variant={verticalFlip ? "default" : "outline"}
+                    onClick={() => setVerticalFlip(!verticalFlip)}
+                  >
+                    <FlipVertical className="mr-2 h-4 w-4" />
+                    Flip Vertical
+                  </Button>
+                </div>
+              </TabsContent>
+              <TabsContent value="effects" className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Effect Type
+                  </label>
+                  <Select value={effectType} onValueChange={setEffectType}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select effect type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None</SelectItem>
+                      <SelectItem value="gaussian">Gaussian Blur</SelectItem>
+                      <SelectItem value="box">Box Blur</SelectItem>
+                      <SelectItem value="radial">Radial Blur</SelectItem>
+                      <SelectItem value="zoom">Zoom Blur</SelectItem>
+                      <SelectItem value="lens">Lens Blur</SelectItem>
+                      <SelectItem value="mosaic">Mosaic</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Effect Strength - {effectStrength}
+                  </label>
+                  <Slider
+                    value={[effectStrength]}
+                    onValueChange={(value) => setEffectStrength(value[0])}
+                    min={0}
+                    max={100}
+                    step={1}
+                  />
+                </div>
+              </TabsContent>
+            </Tabs>
             <Button
               onClick={processImage}
               className="mt-4 w-full"
-              disabled={!image}
+              disabled={!image || loading}
             >
-              Process Image
+              {loading ? "Processing..." : "Process Image"}
             </Button>
           </div>
         </CardContent>
